@@ -1,261 +1,315 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Come Mangonio</title>
-  <style>
-    :root{
-      --bg:#0f1724;
-      --panel:#0b1220;
-      --accent:#ff6b6b;
-      --accent-2:#ffd166;
-      --snake:#4ce0b3;
-      --food:#ff6b6b;
-      --muted:#9aa4b2;
-    }
-    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial}
-    body{background: #0f0;display:flex;align-items:center;justify-content:center;color:#dfe7ef}
-    .wrap{width:980px;max-width:96vw;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.02));border-radius:14px;padding:18px;box-shadow:0 8px 30px rgba(2,6,23,0.7);display:grid;grid-template-columns:1fr 320px;gap:18px}
-    header{grid-column:1/-1;display:flex;align-items:center;gap:12px}
-    h1{margin:0;font-size:20px}
-    .sub{color:var(--muted);font-size:13px}
-    canvas{background:linear-gradient(180deg,#071226 0%, #061024 100%);border-radius:10px;display:block;width:100%;height:auto}
-    .panel{background:var(--panel);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:12px}
-    .score{font-size:28px;font-weight:700;color:var(--accent-2)}
-    .controls{display:flex;gap:8px;flex-wrap:wrap}
-    button{background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(0,0,0,0.03));border:1px solid rgba(255,255,255,0.04);padding:8px 10px;border-radius:8px;color:inherit;cursor:pointer}
-    .muted{color:var(--muted);font-size:13px}
-    .footer{font-size:12px;color:var(--muted)}
-    .big{font-size:18px}
-    .hint{background:rgba(255,255,255,0.02);padding:8px;border-radius:8px}
-    @media (max-width:860px){.wrap{grid-template-columns:1fr;}}
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Come Mangonio</title>
+<style>
+  :root{
+    --panel-bg: #0b0b0b;
+    --panel-contrast: #1b1b1b;
+    --muted: #bdbdbd;
+    --accent: #ffdd55;
+  }
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;}
+
+  /* Página negra */
+  body{
+    background:#000;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:28px;
+  }
+
+  /* Contenedor principal */
+  .wrap{
+    width:980px;
+    max-width:96vw;
+    display:grid;
+    grid-template-columns: 1fr 320px;
+    gap:18px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));
+    border-radius:14px;
+    padding:18px;
+    box-shadow:0 10px 40px rgba(0,0,0,0.6);
+  }
+
+  header{grid-column:1/-1;display:flex;align-items:center;gap:12px;margin-bottom:6px}
+  header img{width:46px;height:46px;border-radius:8px;object-fit:cover;filter:drop-shadow(0 6px 18px rgba(0,0,0,0.6))}
+  h1{margin:0;font-size:20px;color:#fff}
+  .sub{margin:0;color:var(--muted);font-size:13px}
+
+  /* Canvas (tablero) */
+  canvas{
+    width:100%;
+    height:auto;
+    display:block;
+    border-radius:10px;
+    background:transparent;
+    box-shadow: inset 0 0 0 6px rgba(0,0,0,0.03);
+  }
+
+  /* Panel derecho oscuro */
+  .panel{
+    background:var(--panel-bg);
+    border-radius:10px;
+    padding:14px;
+    color:#fff;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    box-shadow: inset 0 -6px 20px rgba(0,0,0,0.25);
+  }
+
+  .score{font-size:28px;font-weight:700;color:var(--accent)}
+  .controls{display:flex;gap:8px;flex-wrap:wrap}
+  button{background:var(--accent);border:none;padding:8px 10px;border-radius:8px;cursor:pointer;font-weight:600}
+  .instructions{background:var(--panel-contrast);padding:10px;border-radius:8px;color:#ddd;font-size:14px;line-height:1.4}
+  .note{color:var(--muted);font-size:12px}
+  @media (max-width:900px){.wrap{grid-template-columns:1fr;}}
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <img src="mangonio.png" alt="Mangonio" style="width:48px;height:48px;border-radius:8px;object-fit:cover;filter:drop-shadow(0 6px 18px rgba(0,0,0,0.6))" onerror="this.style.display='none'" />
-      <div>
-        <h1>Come Mangonio</h1>
-        <div class="sub">Un juego estilo Snake — juega como el gusano <strong>Mangonio</strong></div>
-      </div>
-    </header>
 
-    <main>
-      <canvas id="game" width="640" height="480"></canvas>
-    </main>
+<div class="wrap">
+  <header>
+    <img src="mangonio.png" alt="mangonio" onerror="this.style.display='none'">
+    <div>
+      <h1>Come Mangonio</h1>
+      <div class="sub">Come manzanas para crecer</div>
+    </div>
+  </header>
 
-    <aside class="panel">
-      <div>
-        <div class="muted">Puntuación</div>
-        <div id="score" class="score">0</div>
-        <div class="muted">Velocidad</div>
-        <div id="speedLabel" class="big">Normal</div>
-      </div>
+  <main>
+    <canvas id="game" width="720" height="480"></canvas>
+  </main>
 
-      <div>
-        <div class="muted">Controles</div>
-        <div class="controls">
-          <button id="btnUp">↑</button>
-          <button id="btnLeft">←</button>
-          <button id="btnDown">↓</button>
-          <button id="btnRight">→</button>
-          <button id="btnPause">Pausa</button>
-          <button id="btnRestart">Reiniciar</button>
-        </div>
-      </div>
+  <aside class="panel">
+    <div>
+      <div style="color:var(--muted);font-size:13px">Puntuación</div>
+      <div id="score" class="score">0</div>
+    </div>
 
-      <div class="hint">
-        <div class="muted">Cómo jugar</div>
-        <div class="muted">Muévete con las flechas o WASD. Come la comida para crecer. Evita chocar contra ti mismo y los muros (opcional).</div>
-      </div>
+    <div class="controls">
+      <button id="btnRestart">Reiniciar</button>
+      <button id="btnPause">Pausa</button>
+    </div>
 
-      <div class="footer">Hecho para GitHub — coloca <code>mangonio.png</code> en la misma carpeta para que el personaje aparezca.</div>
-    </aside>
-  </div>
+    <div class="instructions">
+      Flechas o WASD para moverte. <br>
+      Come la manzana para crecer. <br>
+      Tocar un borde o tu propio cuerpo reinicia la partida.
+    </div>
+
+    <div class="note">Coloca <code>mangonio.png</code> y <code>manzana.png</code> en la misma carpeta (minúsculas).</div>
+  </aside>
+</div>
 
 <script>
-// Come Mangonio - Juego Snake en HTML/JS
-(() => {
-  const canvas = document.getElementById('game');
-  const ctx = canvas.getContext('2d');
-  // Grid settings
-  const GRID_SIZE = 20; // pixels per cell
-  const COLS = Math.floor(canvas.width / GRID_SIZE);
-  const ROWS = Math.floor(canvas.height / GRID_SIZE);
+/* --- CONFIG --- */
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
 
-  // Game state
-  let snake = [{x: Math.floor(COLS/2), y: Math.floor(ROWS/2)}];
-  let dir = {x: 1, y: 0};
-  let nextDir = {x:1,y:0};
-  let food = null;
-  let score = 0;
-  let tickMs = 16; // speed (lower = faster)
-  let running = true;
-  let wallsKill = false; // changeable
-  let imgMangonio = new Image();
-  let imgReady = false;
-  imgMangonio.src = 'mangonio.png';
-  imgMangonio.onload = () => { imgReady = true; }
-  imgMangonio.onerror = () => { imgReady = false; }
+const GRID_SIZE = 20;               // tamaño en px del grid
+const COLS = Math.floor(canvas.width / GRID_SIZE);
+const ROWS = Math.floor(canvas.height / GRID_SIZE);
 
-  const scoreEl = document.getElementById('score');
-  const speedLabel = document.getElementById('speedLabel');
+let snake = [];
+let dir = {x:1,y:0};
+let nextDir = {x:1,y:0};
+let food = null;
+let score = 0;
+let running = true;
+let paused = false;
 
-  function randEmptyCell(){
-    while(true){
-      const x = Math.floor(Math.random()*COLS);
-      const y = Math.floor(Math.random()*ROWS);
-      if(!snake.some(s=>s.x===x && s.y===y)) return {x,y};
-    }
-  }
+/* Preload imágenes */
+const imgHead = new Image();
+const imgApple = new Image();
+let imgHeadLoaded = false;
+let imgAppleLoaded = false;
+imgHead.src = 'mangonio.png';
+imgApple.src = 'manzana.png';
+imgHead.onload = ()=> imgHeadLoaded = true;
+imgApple.onload = ()=> imgAppleLoaded = true;
+imgHead.onerror = ()=> imgHeadLoaded = false;
+imgApple.onerror = ()=> imgAppleLoaded = false;
 
-  function placeFood(){ food = randEmptyCell(); }
+/* Patrón de fondo (chequered) colores parecidos a Snake */
+const bgColor1 = '#2b7d2b'; // oscuro
+const bgColor2 = '#2fa132'; // claro
+
+/* Inicializar */
+function reset(){
+  snake = [{x: Math.floor(COLS/2), y: Math.floor(ROWS/2)}];
+  dir = {x:1,y:0};
+  nextDir = {x:1,y:0};
   placeFood();
+  score = 0;
+  document.getElementById('score').innerText = score;
+  running = true;
+  paused = false;
+}
+reset();
 
-  function setSpeed(ms){ tickMs = ms; if(ms<80) speedLabel.textContent='Rápido'; else if(ms<140) speedLabel.textContent='Normal'; else speedLabel.textContent='Lento'; }
-  setSpeed(120);
-
-  function reset(){
-    snake = [{x: Math.floor(COLS/2), y: Math.floor(ROWS/2)}];
-    dir = {x:1,y:0}; nextDir={x:1,y:0};
-    score=0; scoreEl.textContent = score; placeFood(); running=true; setSpeed(120);
+/* Colocar comida en celda vacía */
+function placeFood(){
+  while(true){
+    const x = Math.floor(Math.random()*COLS);
+    const y = Math.floor(Math.random()*ROWS);
+    if(!snake.some(s=>s.x===x && s.y===y)){ food = {x,y}; break; }
   }
+}
 
-  function step(){
-    if(!running) return;
-    // apply buffered direction but prevent reverse
-    if(Math.abs(nextDir.x) !== Math.abs(dir.x) || Math.abs(nextDir.y) !== Math.abs(dir.y)) dir = nextDir;
+/* Input */
+window.addEventListener('keydown', e=>{
+  const k = e.code;
+  if(k === 'ArrowUp' || k === 'KeyW') nextDir = {x:0,y:-1};
+  if(k === 'ArrowDown' || k === 'KeyS') nextDir = {x:0,y:1};
+  if(k === 'ArrowLeft' || k === 'KeyA') nextDir = {x:-1,y:0};
+  if(k === 'ArrowRight' || k === 'KeyD') nextDir = {x:1,y:0};
+  if(k === 'Space') { paused = !paused; }
+});
+
+/* Buttons */
+document.getElementById('btnRestart').addEventListener('click', ()=> reset());
+document.getElementById('btnPause').addEventListener('click', ()=>{
+  paused = !paused;
+  document.getElementById('btnPause').innerText = paused ? 'Reanudar' : 'Pausa';
+});
+
+/* Juego: actualización a pasos (movimientos por segundo) */
+const movesPerSecond = 10;               // cuantos movimientos por segundo (Snake clásico)
+const moveInterval = 1000 / movesPerSecond;
+let acc = 0, last = performance.now();
+
+function update(delta){
+  if(!running || paused) return;
+
+  acc += delta;
+  while(acc >= moveInterval){
+    acc -= moveInterval;
+
+    // evitar reversa completa
+    if(Math.abs(nextDir.x) !== Math.abs(dir.x) || Math.abs(nextDir.y) !== Math.abs(dir.y)){
+      dir = nextDir;
+    }
+
     const head = {x: snake[0].x + dir.x, y: snake[0].y + dir.y};
 
-    // wall collisions
-    if(wallsKill){
-      if(head.x < 0 || head.x >= COLS || head.y < 0 || head.y >= ROWS){ gameOver(); return; }
-    } else {
-      head.x = (head.x + COLS) % COLS;
-      head.y = (head.y + ROWS) % ROWS;
+    // colisión con muro -> reiniciar
+    if(head.x < 0 || head.x >= COLS || head.y < 0 || head.y >= ROWS){
+      reset(); return;
     }
 
-    // self collision
-    if(snake.some((s,idx) => idx>0 && s.x===head.x && s.y===head.y)) { gameOver(); return; }
+    // colisión con cuerpo
+    if(snake.some((s, i) => i>0 && s.x === head.x && s.y === head.y)){
+      reset(); return;
+    }
 
     snake.unshift(head);
 
-    // eat?
-    if(food && head.x===food.x && head.y===food.y){
-      score+=10; scoreEl.textContent = score;
+    // comer?
+    if(food && head.x === food.x && head.y === food.y){
+      score += 10;
+      document.getElementById('score').innerText = score;
       placeFood();
-      // speed up a little every 5 foods
-      if(score % 50 === 0) setSpeed(Math.max(60, tickMs - 10));
     } else {
       snake.pop();
     }
   }
+}
 
-  function gameOver(){ running=false; showOverlay('¡Game Over! Pulsar Reiniciar'); }
-
-  // draw
-  function draw(){
-    // background
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    // grid subtle
-    ctx.fillStyle = 'rgba(255,255,255,0.02)';
-    for(let x=0;x<COLS;x++){
-      for(let y=0;y<ROWS;y++){
-        if((x+y)%2===0) ctx.fillRect(x*GRID_SIZE,y*GRID_SIZE,GRID_SIZE,GRID_SIZE);
-      }
+/* Dibujado */
+function drawBackground(){
+  // chequered pattern
+  for(let x=0;x<COLS;x++){
+    for(let y=0;y<ROWS;y++){
+      const even = ((x+y) % 2 === 0);
+      ctx.fillStyle = even ? bgColor1 : bgColor2;
+      ctx.fillRect(x*GRID_SIZE, y*GRID_SIZE, GRID_SIZE, GRID_SIZE);
     }
+  }
+}
 
-    // food
-    if(food){
-      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--food').trim() || '#ff6b6b';
-      roundRect(ctx, food.x*GRID_SIZE+4, food.y*GRID_SIZE+4, GRID_SIZE-8, GRID_SIZE-8, 5, true);
-    }
+function roundedRect(x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.arcTo(x+w, y, x+w, y+h, r);
+  ctx.arcTo(x+w, y+h, x, y+h, r);
+  ctx.arcTo(x, y+h, x, y, r);
+  ctx.arcTo(x, y, x+w, y, r);
+  ctx.closePath();
+}
 
-    // snake
-    for(let i=snake.length-1;i>=0;i--){
-      const s = snake[i];
-      const px = s.x*GRID_SIZE, py = s.y*GRID_SIZE;
-      if(imgReady){
-        ctx.drawImage(imgMangonio, px, py, GRID_SIZE, GRID_SIZE);
-      } else {
-        ctx.fillStyle = '#0a0';
-        ctx.fillRect(px, py, GRID_SIZE, GRID_SIZE);
-      }
+/* Dibujar todo cada frame (60fps) */
+function draw(){
+  // fondo
+  drawBackground();
+
+  // comida -> manzana como imagen si existe, si no un círculo rojo
+  if(food){
+    if(imgAppleLoaded){
+      ctx.drawImage(imgApple, food.x*GRID_SIZE, food.y*GRID_SIZE, GRID_SIZE, GRID_SIZE);
     } else {
-        // body
-        const grad = ctx.createLinearGradient(px,py,px+GRID_SIZE,py+GRID_SIZE);
-        grad.addColorStop(0,getComputedStyle(document.documentElement).getPropertyValue('--snake').trim() || '#4ce0b3');
-        grad.addColorStop(1,'#2bb28f');
-        ctx.fillStyle = grad;
-        roundRect(ctx, px+2, py+2, GRID_SIZE-4, GRID_SIZE-4, 4, true);
-      }
+      ctx.fillStyle = '#ff5a5a';
+      ctx.beginPath();
+      ctx.arc(food.x*GRID_SIZE + GRID_SIZE/2, food.y*GRID_SIZE + GRID_SIZE/2, GRID_SIZE*0.4, 0, Math.PI*2);
+      ctx.fill();
     }
   }
 
-  function roundRect(ctx, x, y, w, h, r, fill){
-    ctx.beginPath();
-    ctx.moveTo(x+r, y);
-    ctx.arcTo(x+w, y, x+w, y+h, r);
-    ctx.arcTo(x+w, y+h, x, y+h, r);
-    ctx.arcTo(x, y+h, x, y, r);
-    ctx.arcTo(x, y, x+w, y, r);
-    ctx.closePath();
-    if(fill) ctx.fill(); else ctx.stroke();
+  // cuerpo (empieza en i=1) -> amarillo con esquinas redondeadas
+  for(let i=snake.length-1;i>=1;i--){
+    const s = snake[i];
+    const px = s.x * GRID_SIZE;
+    const py = s.y * GRID_SIZE;
+    ctx.fillStyle = '#ffdf70';
+    roundedRect(px+3, py+3, GRID_SIZE-6, GRID_SIZE-6, 6);
+    ctx.fill();
   }
 
-  // overlay simple (alert fallback)
-  function showOverlay(text){
-    setTimeout(()=>alert(text), 50);
+  // cabeza -> imagen mangonio si carga, si no un recto verde oscuro
+  const head = snake[0];
+  if(head){
+    const px = head.x * GRID_SIZE;
+    const py = head.y * GRID_SIZE;
+
+    if(imgHeadLoaded){
+      // dibujar la cabeza centrada en la celda
+      ctx.drawImage(imgHead, px, py, GRID_SIZE, GRID_SIZE);
+    } else {
+      ctx.fillStyle = '#0a8a0a';
+      roundedRect(px+2, py+2, GRID_SIZE-4, GRID_SIZE-4, 6);
+      ctx.fill();
+      // ojo simple
+      ctx.fillStyle = '#052027';
+      ctx.beginPath();
+      ctx.arc(px + GRID_SIZE*0.65, py + GRID_SIZE*0.35, 2, 0, Math.PI*2);
+      ctx.fill();
+    }
   }
+}
 
-  // input
-  window.addEventListener('keydown', e=>{
-    if(['ArrowUp','KeyW'].includes(e.code)) nextDir = {x:0,y:-1};
-    if(['ArrowDown','KeyS'].includes(e.code)) nextDir = {x:0,y:1};
-    if(['ArrowLeft','KeyA'].includes(e.code)) nextDir = {x:-1,y:0};
-    if(['ArrowRight','KeyD'].includes(e.code)) nextDir = {x:1,y:0};
-    if(e.code==='KeyP') running = !running;
-  });
-
-  // on-screen buttons
-  document.getElementById('btnUp').addEventListener('click', ()=> nextDir={x:0,y:-1});
-  document.getElementById('btnDown').addEventListener('click', ()=> nextDir={x:0,y:1});
-  document.getElementById('btnLeft').addEventListener('click', ()=> nextDir={x:-1,y:0});
-  document.getElementById('btnRight').addEventListener('click', ()=> nextDir={x:1,y:0});
-  document.getElementById('btnPause').addEventListener('click', ()=> running = !running);
-  document.getElementById('btnRestart').addEventListener('click', ()=> reset());
-
-  // touch swipe support (simple)
-  let touchStart = null;
-  canvas.addEventListener('touchstart', e=>{ touchStart = e.touches[0]; });
-  canvas.addEventListener('touchend', e=>{
-    if(!touchStart) return; const t = e.changedTouches[0]; const dx = t.clientX - touchStart.clientX; const dy = t.clientY - touchStart.clientY;
-    if(Math.abs(dx) > Math.abs(dy)) nextDir = {x: dx>0?1:-1, y:0}; else nextDir = {x:0, y: dy>0?1:-1}; touchStart = null;
-  });
-
-  // main loop
-  let accumulator = 0;
-  let last = performance.now();
-  function loop(now){
-    const dt = now - last; last = now; accumulator += dt;
-    while(accumulator >= tickMs){ step(); accumulator -= tickMs; }
-    draw();
-    requestAnimationFrame(loop);
-  }
+/* Game loop (draw 60fps, update at movesPerSecond) */
+function loop(now){
+  const delta = now - last;
+  last = now;
+  update(delta);
+  draw();
   requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
 
-  // resize handling: keep canvas integer multiple of grid
-  function fitCanvas(){
-    const containerWidth = Math.min(800, window.innerWidth*0.6);
-    // keep original pixel size for crisp grid; (optional) you can change CSS scaling
-  }
-  window.addEventListener('resize', fitCanvas);
+/* Ajustes responsivos: mantener la resolución del canvas en sus pixeles (opcional) */
+function fitCanvasCSS(){
+  // dejamos el canvas con su tamaño intrínseco; CSS controla la escala por width:100% en el layout
+  // pero si quieres adaptar el número de tiles al ancho, habría que recalcular COLS/ROWS y reconfigurar.
+}
+window.addEventListener('resize', fitCanvasCSS);
+fitCanvasCSS();
 
-  // expose for debug
-  window.ComeMangonio = {reset, setSpeed:ms=>setSpeed(ms), getState:()=>({score,snake})};
-})();
 </script>
 </body>
 </html>
