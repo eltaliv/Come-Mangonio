@@ -15,7 +15,7 @@
       --muted:#9aa4b2;
     }
     html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial}
-    body{background:linear-gradient(180deg,var(--bg),#071021);display:flex;align-items:center;justify-content:center;color:#dfe7ef}
+    body{background: #0f0;display:flex;align-items:center;justify-content:center;color:#dfe7ef}
     .wrap{width:980px;max-width:96vw;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.02));border-radius:14px;padding:18px;box-shadow:0 8px 30px rgba(2,6,23,0.7);display:grid;grid-template-columns:1fr 320px;gap:18px}
     header{grid-column:1/-1;display:flex;align-items:center;gap:12px}
     h1{margin:0;font-size:20px}
@@ -91,7 +91,7 @@
   let nextDir = {x:1,y:0};
   let food = null;
   let score = 0;
-  let tickMs = 120; // speed (lower = faster)
+  let tickMs = 16; // speed (lower = faster)
   let running = true;
   let wallsKill = false; // changeable
   let imgMangonio = new Image();
@@ -177,23 +177,13 @@
     for(let i=snake.length-1;i>=0;i--){
       const s = snake[i];
       const px = s.x*GRID_SIZE, py = s.y*GRID_SIZE;
-      if(i===0){
-        // head: draw image if available otherwise circle
-        if(imgReady){
-          ctx.save();
-          // rotate image to direction
-          const angle = Math.atan2(dir.y, dir.x);
-          ctx.translate(px+GRID_SIZE/2, py+GRID_SIZE/2);
-          ctx.rotate(angle);
-          ctx.drawImage(imgMangonio, -GRID_SIZE/2, -GRID_SIZE/2, GRID_SIZE, GRID_SIZE);
-          ctx.restore();
-        } else {
-          ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--snake').trim() || '#4ce0b3';
-          roundRect(ctx, px+2, py+2, GRID_SIZE-4, GRID_SIZE-4, 6, true);
-          // eye
-          ctx.fillStyle='#052027'; ctx.beginPath(); ctx.arc(px+GRID_SIZE*0.65, py+GRID_SIZE*0.35, 2.2, 0, Math.PI*2); ctx.fill();
-        }
+      if(imgReady){
+        ctx.drawImage(imgMangonio, px, py, GRID_SIZE, GRID_SIZE);
       } else {
+        ctx.fillStyle = '#0a0';
+        ctx.fillRect(px, py, GRID_SIZE, GRID_SIZE);
+      }
+    } else {
         // body
         const grad = ctx.createLinearGradient(px,py,px+GRID_SIZE,py+GRID_SIZE);
         grad.addColorStop(0,getComputedStyle(document.documentElement).getPropertyValue('--snake').trim() || '#4ce0b3');
