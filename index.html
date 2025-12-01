@@ -105,10 +105,8 @@
     </div>
   </header>
 
-  <!-- GRAN ZONA DE JUEGO -->
   <canvas id="game" width="900" height="600"></canvas>
 
-  <!-- PANEL DERECHO -->
   <aside class="panel">
     <div>
       <div style="color:#777;font-size:14px">Puntuación</div>
@@ -119,8 +117,8 @@
     <button id="btnPause">Pausa</button>
 
     <div class="instructions">
-      Usa WASD o flechas para moverte.  
-      Come manzanas para crecer.  
+      Usa WASD o flechas para moverte.<br>
+      Come manzanas para crecer.<br>
       Si chocas el borde o tu cuerpo, pierdes.
     </div>
   </aside>
@@ -129,17 +127,15 @@
 
 
 <script>
+
 /* ========== CONFIGURACIÓN ========== */
 
-// MAPA MÁS PEQUEÑO, PERO CELDAS MÁS GRANDES
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-// tablero reducido
+// tablero reducido + celdas grandes
 const COLS = 23;
 const ROWS = 15;
-
-// celdas grandes para que el gameplay sea más grande
 const CELL = 36;
 
 canvas.width = COLS * CELL;
@@ -152,11 +148,15 @@ let food = null;
 let score = 0;
 let paused = false;
 
-// Colores EXACTOS del Snake de Google
-const c1 = "#76c442";  // verde claro
-const c2 = "#6eb73d";  // verde medio
+// colores Snake Google
+const c1 = "#76c442";
+const c2 = "#6eb73d";
 
-// Cargar imágenes
+// obtener botones (ARREGLO DEL ERROR)
+const btnPause = document.getElementById("btnPause");
+const btnRestart = document.getElementById("btnRestart");
+
+// imágenes
 const imgHead = new Image();
 const imgApple = new Image();
 let headOK=false, appleOK=false;
@@ -202,18 +202,17 @@ window.addEventListener("keydown", e=>{
   if(e.code==="Space") paused = !paused;
 });
 
-document.getElementById("btnRestart").onclick = ()=> resetGame();
-document.getElementById("btnPause").onclick = ()=>{
+btnRestart.onclick = ()=> resetGame();
+btnPause.onclick = ()=>{
   paused = !paused;
   btnPause.innerText = paused ? "Reanudar" : "Pausa";
 };
 
 
-/* ========== ACTUALIZACIÓN 60 FPS ========== */
+/* ========== UPDATE 60 FPS ========== */
 function update(){
   if(paused) return;
 
-  // aplicar dirección si no es reversa
   if(Math.abs(nextDir.x) !== Math.abs(dir.x) || Math.abs(nextDir.y) !== Math.abs(dir.y))
     dir = nextDir;
 
@@ -221,20 +220,16 @@ function update(){
   const nx = head.x + dir.x;
   const ny = head.y + dir.y;
 
-  // colisión con pared
   if(nx<0 || nx>=COLS || ny<0 || ny>=ROWS){
     resetGame(); return;
   }
 
-  // colisión con cuerpo
   if(snake.some((s,i)=>i>0 && s.x===nx && s.y===ny)){
     resetGame(); return;
   }
 
-  // mover
   snake.unshift({x:nx, y:ny});
 
-  // comer
   if(nx===food.x && ny===food.y){
     score+=10;
     document.getElementById("score").innerText = score;
@@ -245,9 +240,8 @@ function update(){
 }
 
 
-/* ========== DIBUJAR ========== */
+/* ========== DRAW ========== */
 function draw(){
-  // Fondo estilo Google Snake
   for(let x=0;x<COLS;x++){
     for(let y=0;y<ROWS;y++){
       ctx.fillStyle = ((x+y)%2===0)?c1:c2;
@@ -255,7 +249,7 @@ function draw(){
     }
   }
 
-  // manzana
+  // apple
   if(appleOK){
     ctx.drawImage(imgApple, food.x*CELL, food.y*CELL, CELL, CELL);
   } else {
@@ -265,13 +259,13 @@ function draw(){
     ctx.fill();
   }
 
-  // cuerpo
+  // body
   ctx.fillStyle="#ffd652";
   for(let i=1;i<snake.length;i++){
     ctx.fillRect(snake[i].x*CELL+4, snake[i].y*CELL+4, CELL-8, CELL-8);
   }
 
-  // cabeza
+  // head
   const h = snake[0];
   if(headOK){
     ctx.drawImage(imgHead, h.x*CELL, h.y*CELL, CELL, CELL);
@@ -282,13 +276,14 @@ function draw(){
 }
 
 
-/* ========== LOOP REAL A 60 FPS ========== */
+/* ========== LOOP 60FPS ========== */
 function loop(){
   update();
   draw();
   requestAnimationFrame(loop);
 }
 loop();
+
 </script>
 
 </body>
