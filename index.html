@@ -147,6 +147,18 @@ let food = null;
 let score = 0;
 let paused = false;
 
+// ====== CORRECCIÓN: definir botones (faltaban) ======
+const btnPause = document.getElementById("btnPause");
+const btnRestart = document.getElementById("btnRestart");
+// ====================================================
+
+// ====== CORRECCIÓN: cargar imágenes (faltaban) ======
+const imgHead = new Image();
+const imgApple = new Image();
+imgHead.src = "mangonio.png";
+imgApple.src = "manzana.png";
+// ====================================================
+
 // Movimiento suave
 let speed = 4; // píxeles por frame (ajusta esto)
 let targetPos = null;
