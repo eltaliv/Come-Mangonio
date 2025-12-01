@@ -128,8 +128,6 @@
 
 <script>
 
-/* ========== CONFIGURACIÓN ========== */
-
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
@@ -147,23 +145,17 @@ let food = null;
 let score = 0;
 let paused = false;
 
-// ====== CORRECCIÓN: definir botones (faltaban) ======
 const btnPause = document.getElementById("btnPause");
 const btnRestart = document.getElementById("btnRestart");
-// ====================================================
 
-// ====== CORRECCIÓN: cargar imágenes (faltaban) ======
 const imgHead = new Image();
 const imgApple = new Image();
 imgHead.src = "mangonio.png";
 imgApple.src = "manzana.png";
-// ====================================================
 
-// Movimiento suave
-let speed = 4; // píxeles por frame (ajusta esto)
+let speed = 4;
 let targetPos = null;
 
-/* ====== NUEVO: posiciones reales en px ====== */
 function initPixelPos() {
   for (let i = 0; i < snake.length; i++) {
     snake[i].xPix = snake[i].x * CELL;
@@ -171,7 +163,6 @@ function initPixelPos() {
   }
 }
 
-/* ====== Inicializar ====== */
 function resetGame(){
   snake = [{x: Math.floor(COLS/2), y: Math.floor(ROWS/2)}];
   initPixelPos();
@@ -188,8 +179,6 @@ function resetGame(){
 }
 resetGame();
 
-
-/* ========== COMIDA ========== */
 function spawnFood(){
   while(true){
     const x = Math.floor(Math.random()*COLS);
@@ -201,8 +190,6 @@ function spawnFood(){
   }
 }
 
-
-/* ========== INPUT ========== */
 window.addEventListener("keydown", e=>{
   if(e.code==="ArrowUp"||e.code==="KeyW") nextDir={x:0,y:-1};
   if(e.code==="ArrowDown"||e.code==="KeyS") nextDir={x:0,y:1};
@@ -217,17 +204,14 @@ btnPause.onclick = ()=>{
   btnPause.innerText = paused ? "Reanudar" : "Pausa";
 };
 
-
-/* ========== UPDATE SUAVE (sin saltos) ========== */
 function update(){
   if(paused) return;
 
-  // mover suavemente hacia la celda destino
   const head = snake[0];
 
-  // actualizar dirección solo cuando llega a la celda
-  if (Math.abs(head.xPix - targetPos.x) < 1 &&
-      Math.abs(head.yPix - targetPos.y) < 1) {
+  /* === CORRECCIÓN: margen basado en la velocidad === */
+  if (Math.abs(head.xPix - targetPos.x) < speed &&
+      Math.abs(head.yPix - targetPos.y) < speed) {
 
     head.x = Math.floor(targetPos.x / CELL);
     head.y = Math.floor(targetPos.y / CELL);
@@ -269,15 +253,12 @@ function update(){
     }
   }
 
-  // interpolación suave en px
   for(let i = 0; i < snake.length; i++){
     snake[i].xPix += Math.sign(snake[i].x * CELL - snake[i].xPix) * speed;
     snake[i].yPix += Math.sign(snake[i].y * CELL - snake[i].yPix) * speed;
   }
 }
 
-
-/* ========== DRAW ========== */
 function draw(){
   for(let x=0;x<COLS;x++){
     for(let y=0;y<ROWS;y++){
@@ -288,11 +269,6 @@ function draw(){
 
   if(imgApple.complete){
     ctx.drawImage(imgApple, food.x*CELL, food.y*CELL, CELL, CELL);
-  } else {
-    ctx.fillStyle="red";
-    ctx.beginPath();
-    ctx.arc(food.x*CELL+CELL/2, food.y*CELL+CELL/2, CELL*0.4, 0, Math.PI*2);
-    ctx.fill();
   }
 
   ctx.fillStyle="#ffd652";
@@ -303,14 +279,9 @@ function draw(){
   const h = snake[0];
   if(imgHead.complete){
     ctx.drawImage(imgHead, h.xPix, h.yPix, CELL, CELL);
-  } else {
-    ctx.fillStyle="#0a8a0a";
-    ctx.fillRect(h.xPix+3, h.yPix+3, CELL-6, CELL-6);
   }
 }
 
-
-/* ========== LOOP 60FPS ========== */
 function loop(){
   update();
   draw();
