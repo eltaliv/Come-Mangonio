@@ -148,6 +148,11 @@ let food = null;
 let score = 0;
 let paused = false;
 
+// >>>>> CAMBIO PARA BAJAR VELOCIDAD <<<<<
+let moveDelay = 10;   // aumenta este número para hacerlo más lento
+let moveCounter = 0;
+// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
 // colores Snake Google
 const c1 = "#76c442";
 const c2 = "#6eb73d";
@@ -212,6 +217,12 @@ btnPause.onclick = ()=>{
 /* ========== UPDATE 60 FPS ========== */
 function update(){
   if(paused) return;
+
+  // >>>>> CONTROL DE VELOCIDAD <<<<<
+  moveCounter++;
+  if (moveCounter < moveDelay) return;
+  moveCounter = 0;
+  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
   if(Math.abs(nextDir.x) !== Math.abs(dir.x) || Math.abs(nextDir.y) !== Math.abs(dir.y))
     dir = nextDir;
